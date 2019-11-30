@@ -1,0 +1,106 @@
+package com.creativeitsoft.amargym;
+
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.NestedScrollView;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.creativeitsoft.amargym.Adapter.TransactionHistoryAdapter;
+import com.creativeitsoft.amargym.Utility.Config;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.squareup.picasso.Picasso;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+public class NogymActivity extends AppCompatActivity {
+
+    CircleImageView circleImageView,img_nogym,img_gymlogopending,img_gymlogonotsubscribed;
+    SQLiteHandler db;
+    ProgressDialog dialog;
+    ApiInterface apiInterface;
+    Button btn_logout;
+    DrawerLayout drawerLayout;
+    NavigationView navigationView;
+    SessionManager session;
+    ImageView img_drawerproimage,img_propic;
+    ImageView ActiveYourDay;
+    TextView drawerproname,draweraddress;
+    ImageView img_back,img_drawer,img_workout,img_gymsearch,img_fithobo,img_offer;
+    LinearLayout lay_alertfooter,lay_profilefooter,lay_homefooter,lay_workoutfooter,lay_searchfooter;
+    LinearLayout lay_findgym,lay_personaltrainer,lay_video,lay_history,lay_settings,lay_contactus,lay_terms,lay_favoriteGym,lay_notification;
+    TextView tv_gymname,tv_gymaddress;
+    TextView tv_membersincegym,tv_membertill,tv_paymentstatus,tv_membershiptype,tv_daysleft,tv_city,tv_age,tv_membersince,tv_gender;
+    ImageView img_bodyfat,img_activenogym,img_weightlifted,img_cardio;
+    ImageView img_bodyweight;
+    Animation animSlideUp,animSlideDown;
+    public Button btn_listview, btn_mapview, btn_add, btn_filter;
+    LinearLayout ll_dialog;
+    NestedScrollView lldashboard;
+    String gymstatus;
+    int count=0;
+    TextView tv_proname,tv_bodyweightnogym,tv_bodyfatnogym;
+    RelativeLayout rlalready,rlwantojoin,rlnogym,rlsubscribed,rlnotsubscribed;
+    TextView tv_gymnamesubscribed,tv_gymnamenotsubscribed,tv_contact,tvgymsubscribed;
+    TextView tv_nogym;
+    ImageView img_dropdown,img_clicktoactive,img_weightliftednogym,img_cardionogym;
+    String TAG="Firebase topic subscription";
+    TextView tv_weightdiff,tv_fatdiff;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_nogymselected);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+        apiInterface=ApiUtils.getAPIService();
+        db=new SQLiteHandler(NogymActivity.this);
+        dialog=new ProgressDialog(NogymActivity.this);
+        session=new SessionManager(NogymActivity.this);
+        img_propic=(CircleImageView)findViewById(R.id.img_profilepicnogymdashboard);
+        tv_city=(TextView)findViewById(R.id.tv_citydashboardnogym);
+        img_weightliftednogym = findViewById(R.id.img_weightliftednogym);
+        img_cardionogym = findViewById(R.id.img_cardionogym);
+        tv_membersince=(TextView)findViewById(R.id.tv_membersincedashboardnogym);
+        tv_age=(TextView)findViewById(R.id.tv_agedashboardnogym);
+        tv_gender=(TextView)findViewById(R.id.tv_genderdashboardnogym);
+        img_drawerproimage=(CircleImageView) findViewById(R.id.img_profilepicdrawer);
+        drawerproname=(TextView)findViewById(R.id.profilename_drawerdashboard);
+        draweraddress=(TextView)findViewById(R.id.address_drawerdashboard);
+        tv_proname=(TextView)findViewById(R.id.profilenamedashboardnogym);
+        tv_nogym=(TextView)findViewById(R.id.tv_selectgym);
+        img_bodyweight=(ImageView)findViewById(R.id.img_bodyweightdashboardnogym);
+        /*img_clicktoactive=findViewById(R.id.img_clicktoactivenogym);*/
+  

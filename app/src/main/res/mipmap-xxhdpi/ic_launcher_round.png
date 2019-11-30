@@ -1,0 +1,288 @@
+package com.creativeitsoft.amargym;
+
+import android.app.ProgressDialog;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.design.widget.NavigationView;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+
+import com.creativeitsoft.amargym.Adapter.CustomInjuryListAdapter;
+import com.creativeitsoft.amargym.Adapter.HLVAdapter;
+import com.creativeitsoft.amargym.Model.Injury;
+import com.creativeitsoft.amargym.Model.WorksDayClass;
+import com.creativeitsoft.amargym.Utility.Config;
+import com.squareup.picasso.Picasso;
+
+import java.text.SimpleDateFormat;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+
+public class WorkoutListActivity extends AppCompatActivity {
+
+
+    LinearLayout layout1,layout2;
+
+    Spinner spinner;
+    SQLiteHandler db;
+    ProgressDialog dialog;
+    RecyclerView mRecyclerView,workDetailsRecycleV;
+    RecyclerView.LayoutManager mLayoutManager;
+    RecyclerView.Adapter mAdapter;
+    ArrayList<String> date;
+    ArrayList<String>month;
+    ArrayList<String>year;
+    ImageView img_left,img_right;
+    ArrayList<String>monthyear;
+    int id=0;
+    boolean clicked;
+    TextView tv_monthyear;
+    ApiInterface apiInterface;
+    Button btn_logout;
+    Toolbar toolbar;
+    ActionBar actionbar;
+    DrawerLayout drawerLayout;
+    NavigationView navigationView;
+    SessionManager session;
+    ImageView img_drawerproimage;
+    TextView drawerproname,draweraddress;
+    ImageView img_back,img_drawer,img_workout,img_gymsearch,img_fithobo;
+    LinearLayout lay_alertfooter,lay_profilefooter,lay_homefooter,lay_workoutfooter,lay_searchfooter;
+    LinearLayout lay_findgym,lay_personaltrainer,lay_video,lay_history,lay_settings,lay_contactus,lay_terms,lay_favoriteGym,lay_notification;
+    public Button btn_listview, btn_mapview, btn_add, btn_filter;
+    int count=0;
+    ImageView img_dropdown;
+    ListView lv_injury;
+    CustomInjuryListAdapter customInjuryListAdapter;
+    List<Injury> injuryList;
+    ImageView img_dropdowndashboard;
+    LinearLayout ll_searchdialog;
+    TextView title;
+    public Button btn_equipment, btn_suppliment, btn_spa, btn_gymsearch;
+
+
+
+    String getMothforDateChange;
+
+
+
+
+    TextView   L2mocOutNum1Tv,L2mocoutNum2Tv,L2mocoutFixedTv,L2KgLiftedNumTv
+            ,L2KgLiftedFexedTv,L2CardioNumTv,L2CardioFixedTv,L2TrainerTv
+            ,L2TrainerNameTV,L2Day,L2DayCount;
+
+    ImageView  L2MoutIv,L2kgLiftedIv,L2CardioIv;
+
+    RecyclerView L2RecycleV;
+    String pos;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_workout_list);
+        toolbar = (Toolbar) findViewById(R.id.toolbargymsearch);
+        actionbar=getSupportActionBar();
+        session=new SessionManager(WorkoutListActivity.this);
+        drawerLayout=(DrawerLayout)findViewById(R.id.drawer_layout_workoutlist);
+        navigationView = (NavigationView) findViewById(R.id.nav_viewworkoutlist);
+        lv_injury=(ListView)findViewById(R.id.lv_injury);
+        injuryList=new ArrayList<Injury>();
+        apiInterface=ApiUtils.getAPIService();
+        title=(TextView)findViewById(R.id.toolbartitle_gymsearch);
+        db=new SQLiteHandler(WorkoutListActivity.this);
+        img_drawer=(ImageView)findViewById(R.id.img_drawer_gymsearch);
+        img_back=(ImageView)findViewById(R.id.img_back_gymsearch);
+        img_drawerproimage=(CircleImageView) findViewById(R.id.img_profilepicdrawer);
+        drawerproname=(TextView)findViewById(R.id.profilename_drawerdashboard);
+        draweraddress=(TextView)findViewById(R.id.address_drawerdashboard);
+        lay_alertfooter=(LinearLayout)findViewById(R.id.lay_alertfooterdashboard);
+        lay_profilefooter=(LinearLayout)findViewById(R.id.lay_profilefooterdashboard);
+        lay_homefooter=(LinearLayout)findViewById(R.id.lay_homefooterdashboard);
+        lay_workoutfooter=(LinearLayout)findViewById(R.id.lay_workoutfooterdashboard);
+        lay_searchfooter=(LinearLayout)findViewById(R.id.lay_searchfooterdashboard);
+        //lay_findgym=(LinearLayout)findViewById(R.id.findgym);
+        lay_personaltrainer=(LinearLayout)findViewById(R.id.personaltrainer);
+        lay_video=(LinearLayout)findViewById(R.id.video);
+        lay_history=(LinearLayout)findViewById(R.id.history);
+        lay_settings=(LinearLayout)findViewById(R.id.settings);
+        lay_contactus=(LinearLayout)findViewById(R.id.contactus);
+        lay_terms=(LinearLayout)findViewById(R.id.terms);
+        lay_favoriteGym = findViewById(R.id.favoriteGym);
+        btn_logout=(Button)findViewById(R.id.btn_logoutdrawer);
+        ll_searchdialog=(LinearLayout)findViewById(R.id.llmapviewdashboardialog);
+
+        btn_equipment=(Button)findViewById(R.id.btn_equipmentdialog);
+        btn_suppliment=(Button)findViewById(R.id.btn_supplimentdialog);
+        btn_spa=(Button)findViewById(R.id.btn_spadialog);
+        btn_gymsearch=(Button)findViewById(R.id.btn_gymsearchDialog);
+        lay_notification = findViewById(R.id.notification);
+        img_drawer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(Gravity.END);
+            }
+        });
+
+        img_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+
+        title.setText("WORKOUT");
+
+        img_dropdowndashboard=(ImageView)findViewById(R.id.img_dropdown_dashboard);
+
+        lay_searchfooter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                count=count+1;
+                if(count==1)
+                {
+                    ll_searchdialog.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+
+                    if (count%2==0) {
+
+                        ll_searchdialog.setVisibility(View.GONE);
+                    }
+                    else {
+
+                        ll_searchdialog.setVisibility(View.VISIBLE);
+                    }
+                }
+
+            }
+        });
+
+        img_dropdowndashboard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ll_searchdialog.setVisibility(View.GONE);
+            }
+        });
+
+        btn_equipment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(WorkoutListActivity.this, EquipmentSearchActivity.class);
+                i.putExtra("checksuppliment","Equipment");
+                startActivity(i);
+            }
+        });
+
+
+        btn_suppliment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getApplicationContext(), EquipmentSearchActivity.class);
+                i.putExtra("checksuppliment","suppliment");
+                startActivity(i);
+            }
+        });
+
+        btn_spa.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+            }
+        });
+
+        btn_gymsearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(WorkoutListActivity.this, MapViewActivity.class);
+                startActivity(i);
+
+            }
+        });
+
+        lay_alertfooter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i=new Intent(WorkoutListActivity.this,AlertActivity.class);
+                startActivity(i);
+            }
+        });
+
+        lay_profilefooter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i=new Intent(WorkoutListActivity.this,UserprfileActivity.class);
+                startActivity(i);
+            }
+        });
+
+        lay_homefooter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertActivity.getlogged(getApplicationContext());
+            }
+        });
+        lay_workoutfooter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i=new Intent(WorkoutListActivity.this,WorkoutActivity.class);
+                startActivity(i);
+            }
+        });
+      /*  lay_findgym.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent i=new Intent(WorkoutListActivity.this,MapViewActivity.class);
+                startActivity(i);
+            }
+        });*/
+
+        lay_personaltrainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Toast.makeText(getApplicationContext(), "Coming soon", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        lay_terms.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i=new Intent(WorkoutListActivity.this,TermsandConditionActivity.class);
+                startActivity(i);
+            }
+        });
+
+        lay_video.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+    
